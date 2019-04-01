@@ -28,3 +28,11 @@ input{
 #rockerSubmit{
     float: left;
 }
+.rockStar{
+    margin:10px;
+    padding:5px;
+}
+.rockerGIFbutton{
+    float:left;
+    margin: 20px;
+}

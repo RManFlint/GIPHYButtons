@@ -1,136 +1,106 @@
-"use strict";
-var $ = function(id) 
-{ 
-return document.getElementById(id); 
-};
 
-var hangWord;
-var lGuess;
-var wordGuess;
-var wordGuessArray= [];
-var hangWordArray = [];
-var falseCount = 0;
-var falseMsg = "";
+var rockerButtonsArray = ["Joey Ramone", "Johnny Rotten", "Iggy Pop", "Mick Jagger", "Roger Daltrey"];
+//console.log(rockerButtonsArray);
+/*var newRocker;
+
 var wrongGuess = [];
 var indexLength=0;
 var playerWins = 0;
+*/
 
-function wordLoad() 
-	{
-	wordGuessArray.length=0;
-	$("playerGuess").disabled = false;
-	hangWord = $("hangWord").value;
+$(document).on("click", ".rockStar", function() {
 	
-	if (hangWord.search(/[^a-z]/i) !==-1 || hangWord.length > 12 )
-		{
-		alert("Enter only letters. Make sure the word is only twelve letters");
-		return;
-		} 
-	else	
-		{
-		hangWord = hangWord.toLowerCase();
-		hangWordArray = hangWord.split("");
-		$("hangWord").value = "";
+	//$("button").on("click", function() {
+	// In this case, the "this" keyword refers to the button that was clicked
+	var person = $(this).attr("data-name");
+	console.log(person);
+
+	// Constructing a URL to search Giphy for the name of the person who said the quote
+	var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+	  person + "&api_key=G8bzbqfK3z3GbTVircARgYTm2R9lLOjL&limit=10";
+
+	// Performing our AJAX GET request
+	$.ajax({
+	  url: queryURL,
+	  method: "GET"
+	})
+	  // After the data comes back from the API
+	  .then(function(response) {
+		// Storing an array of results in the results variable
+		var results = response.data;
+
+		// Looping over every result item
+		for (var i = 0; i < results.length; i++) {
+
+		  // Only taking action if the photo has an appropriate rating
+		  if (results[i].rating !== "r" && results[i].rating !== "pg-13") {
+			// Creating a div for the gif
+			var gifDiv = $("<div>");
+
+			gifDiv.attr("class", "rockerGIFbutton");
+
+			// Storing the result item's rating
+			var rating = results[i].rating;
+
+			// Creating a paragraph tag with the result item's rating
+			var p = $("<p>").text("Rating: " + rating);
+
+			// Creating an image tag
+			var personImage = $("<img>");
+
+			// Giving the image tag an src attribute of a proprty pulled off the
+			// result item
+			personImage.attr("src", results[i].images.fixed_height.url);
+
+			// Appending the paragraph and personImage we created to the "gifDiv" div we created
+			gifDiv.append(p);
+			gifDiv.append(personImage);
+
+			// Prepending the gifDiv to the "#gifs-appear-here" div in the HTML
+			$("#rockerGIFS").prepend(gifDiv);
+		  }
 		}
-	
-	/*Note this is a no space, not an empty space. An empty space 
-	will leave a blank at the beginning of the string. */ 
-	for (var i=0; i < hangWord.length; i++) 
-		{
-		wordGuessArray[i] = "__ ";
-		}		
-	$("trueLetters").firstChild.nodeValue = wordGuessArray.join("");
-	$("playerGuess").focus();
-	$("playerGuess").value = "";
+	  });
+  });
 
-	}
-	
-	function lGuess() 
-	{
-	var leftGuess;
-	lGuess = $("playerGuess").value;
-	console.log("Hangword in lgues is " + hangWord);
-	if(hangWord.length < 7){
-		leftGuess = hangWord.length;
-	}
-	else{
-		leftGuess = 7;
-	}
+function rockerButtonLoads(){
 
-	
-	if (lGuess.search(/[^a-z]/i) !==-1 || lGuess.length > 1 || wrongGuess.indexOf(lGuess)> -1)
-		{
-		alert("Enter one letter or you've already entered that letter");
-		}		
-	else 
-		{
-		lGuess = lGuess.toLowerCase();
-		}
-	var indices = [];
-	for (var k = 0; k < hangWordArray.length; k++)
-		{
-		if (hangWordArray[k] === lGuess) 
-			{
-			indices.push(k);
-			indexLength++;	
-			console.log("indexLength is " + indexLength);		
-			}
-		}
-		if (hangWordArray.indexOf(lGuess)===-1)
-			{
-			falseCount++;
-			falseMsg = "Prisoner, you have " + falseCount +" wrong guesses." + (leftGuess - falseCount) + " guesses until you swing!";
-			$("falseLetters").firstChild.nodeValue = falseMsg;
-			wrongGuess.push(lGuess);
-			console.log("wrongGuess join is " + wrongGuess.join());
-			console.log("wrongGuess length is " + wrongGuess.length);
-			$("wrongGuess").firstChild.nodeValue = "You have guessed " + wrongGuess.join(", ");
-			console.log("wrongGuess is " +wrongGuess);
-					}
-	for (var l=0; l<indices.length; l++)
-		{
-		var m = indices[l];
-		wordGuessArray[m]= lGuess;
-		$("trueLetters").firstChild.nodeValue = wordGuessArray.join(" ");
-		console.log("indices length is " + indices.length);
-		}
-	if (falseCount===leftGuess){
-		$("falseLetters").firstChild.nodeValue = "To the tumbril, Prisoner!  Where shall we send the corpse?";
-		$("falseLetters").setAttribute("class", "red")
-		$("playerGuess").disabled = true;
-		wordGuessArray.length = 0;
-		indices.length=0;
-		falseCount = 0;
-		indexLength=0;
-		wrongGuess.length=0;
-		$("wrongGuess").firstChild.nodeValue = "";
-	}
-	
-	if (hangWord.length === indexLength){
-		playerWins++;
-		$("falseLetters").firstChild.nodeValue = "You have evaded the hangman for today, Prisoner!  Win five in a row and gain your freedom!";
-		console.log("playerWins are " + playerWins);
-		$("playerWins").firstChild.nodeValue = "You have won " + playerWins + " games.  Win " + parseInt(5-playerWins) + " games and you are free!" ;
-		$("falseLetters").setAttribute("class", "blue")
-		$("playerGuess").disabled = true;
-		wordGuessArray.length = 0;
-		indices.length=0;
-		falseCount = 0;
-		indexLength=0;
-		wrongGuess.length=0;
-		$("wrongGuess").firstChild.nodeValue = "";
-	}
+	// Deleting the movie buttons prior to adding new movie buttons
+	// (this is necessary otherwise we will have repeat buttons)
+	$("#rockerButtons").empty();
 
-	if (playerWins >= 5){
-		$("falseLetters").firstChild.nodeValue = "You have gained your freedom, Prisoner!  Be gone and be damned!";
-	}
-	
-	$("playerGuess").value = "";
-	$("playerGuess").focus();
- 	}
+	// Looping through the array of movies
+	for (var i = 0; i < rockerButtonsArray.length; i++) {
 
-window.onload =  function()
+	  // Then dynamicaly generating buttons for each movie in the array.
+	  // This code $("<button>") is all jQuery needs to create the start and end tag. (<button></button>)
+	  var a = $("<button>");
+	  // Adding a class
+	  a.addClass("rockStar");
+	  // Adding a data-attribute with a value of the movie at index i
+	  a.attr("data-name", rockerButtonsArray[i]);
+	  // Providing the button's text with a value of the movie at index i
+	  a.text(rockerButtonsArray[i]);
+	  // Adding the button to the HTML
+	  $("#rockerButtons").append(a);
+	  //console.log(rockerButtonsArray);
+	}
+}
+/*function submitRocker(){
+	newRocker = $("#rockerInput").nodeValue;
+	console.log(newRocker);
+} */
+
+	 $("#rockerSubmit").on("click", function(event){
+		event.preventDefault();
+		newRocker = $("#rockerInput").val();
+		rockerButtonsArray.push(newRocker);
+		rockerButtonLoads();
+	 });
+rockerButtonLoads();
+/*window.onload =  function()
 	{
 		$("wordSubmit").onclick = wordLoad;
 		$("letterSubmit").onclick = lGuess;	
 	}
+*/
