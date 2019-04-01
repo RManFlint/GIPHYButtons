@@ -9,7 +9,7 @@ var playerWins = 0;
 */
 
 $(document).on("click", ".rockStar", function() {
-	
+	$("#rockerGIFS").empty();
 	//$("button").on("click", function() {
 	// In this case, the "this" keyword refers to the button that was clicked
 	var person = $(this).attr("data-name");
@@ -26,6 +26,7 @@ $(document).on("click", ".rockStar", function() {
 	})
 	  // After the data comes back from the API
 	  .then(function(response) {
+		$("#rockerGIFS").empty();
 		// Storing an array of results in the results variable
 		var results = response.data;
 
